@@ -48,16 +48,16 @@ refs.form.addEventListener('submit', async e => {
     createGallery(data.hits);
     const totalPages = Math.ceil(data.totalHits / PER_PAGE);
 
-    currentPage += 1;
-    if (currentPage > totalPages) {
+    const isLastPage = currentPage === totalPages;
+    if (isLastPage) {
       hideLoadMoreButton();
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results",
       });
-      return;
     } else {
       showLoadMoreButton();
     }
+    currentPage += 1;
 
     e.target.reset();
   } catch (error) {
