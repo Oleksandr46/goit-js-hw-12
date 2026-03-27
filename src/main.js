@@ -51,6 +51,10 @@ refs.form.addEventListener('submit', async e => {
     currentPage += 1;
     if (currentPage > totalPages) {
       hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results",
+      });
+      return;
     } else {
       showLoadMoreButton();
     }
@@ -89,6 +93,7 @@ if (refs.loadMore) {
         iziToast.info({
           message: "We're sorry, but you've reached the end of search results",
         });
+        return;
       } else {
         showLoadMoreButton();
       }
