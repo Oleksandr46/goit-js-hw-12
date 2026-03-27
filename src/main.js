@@ -17,6 +17,7 @@ const refs = {
 };
 let currentQuery = '';
 let currentPage = 1;
+const PER_PAGE = 15;
 
 refs.form.addEventListener('submit', async e => {
   e.preventDefault();
@@ -36,12 +37,7 @@ refs.form.addEventListener('submit', async e => {
   hideLoadMoreButton();
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
-    const totalPages = Math.ceil(data.totalHits / 15);
-    if (currentPage < totalPages) {
-      showLoadMoreButton();
-    } else {
-      hideLoadMoreButton();
-    }
+
     if (!data?.hits?.length) {
       iziToast.error({
         message:
@@ -49,9 +45,16 @@ refs.form.addEventListener('submit', async e => {
       });
       return;
     }
-
     createGallery(data.hits);
+    const totalPages = Math.ceil(data.totalHits / PER_PAGE);
+
     currentPage += 1;
+    if (currentPage > totalPages) {
+      hideLoadMoreButton();
+    } else {
+      showLoadMoreButton();
+    }
+
     e.target.reset();
   } catch (error) {
     iziToast.error({
@@ -61,24 +64,50 @@ refs.form.addEventListener('submit', async e => {
     hideLoader();
   }
 });
-refs.loadMore.addEventListener('click', async e => {
-  e.preventDefault();
+if (refs.loadMore) {
+  refs.loadMore.addEventListener('click', async e => {
+    e.preventDefault();
 
-  showLoader();
-  hideLoadMoreButton();
-
-  const data = await getImagesByQuery(currentQuery, currentPage);
-  appendGallery(data.hits);
-
-  const totalPages = Math.ceil(data.totalHits / 15);
-  if (currentPage < totalPages) {
-    showLoadMoreButton();
-  } else {
+    showLoader();
     hideLoadMoreButton();
-  }
-  iziToast.info({
-    message: "We're sorry, but you've reached the end of search results",
-  });
 
-  currentPage += 1;
-});
+    try {
+      const data = await getImagesByQuery(currentQuery, currentPage);
+      if (!data?.hits?.length) {
+        hideLoadMoreButton();
+        iziToast.info({
+          message: "We're sorry, but you've reached the end of search results",
+        });
+        return;
+      }
+      appendGallery(data.hits);
+      const totalPages = Math.ceil(data.totalHits / PER_PAGE);
+
+      currentPage += 1;
+      if (currentPage > totalPages) {
+        hideLoadMoreButton();
+        iziToast.info({
+          message: "We're sorry, but you've reached the end of search results",
+        });
+      } else {
+        showLoadMoreButton();
+      }
+
+      //scroll
+      const card = document.querySelector('.gallery-item');
+      if (!card) return;
+      const height = card.getBoundingClientRect().height;
+
+      window.scrollBy({
+        top: height * 2,
+        behavior: 'smooth',
+      });
+    } catch (error) {
+      iziToast.error({
+        message: 'Something went wrong. Please try again later.',
+      });
+    } finally {
+      hideLoader();
+    }
+  });
+}

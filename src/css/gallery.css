@@ -108,3 +108,14 @@
 }
 
 /* #endregion */
+
+/* #region load more */
+.load-more {
+  display: none;
+  margin: 0 auto;
+}
+.load-more.visible {
+  margin-top: 32px;
+  display: block;
+}
+/* #endregion */
